@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bases para Lógica Combinatória</title>
+</head>
+<body>
+    <h1>Combinadores</h1>
+
+	<p id="combinadores"></p>
+
+    <form id="formulario-combinador">
+        <label for="simbolo">Simbolo:</label>
+        <input type="text" id="simbolo" name="simbolo">
+        <button type="submit">Adicionar</button>
+    </form>
+
+	<h1>Invariantes</h1>
+
+    <form id="formulario-invariante">
+        <label for="nome">Nome:</label>
+        <input type="text" id="nome" name="nome">
+		<label for="excecoes">Exceções:</label>
+        <input type="text" id="excecoes" name="excecoes">
+        <button type="submit">Adicionar</button>
+    </form>
+
+	<button onclick="window.location.href='/dados.html'" style="margin-top: 10px;">Ver todas as invariantes</button>
+
+	<h1>Fórmulas</h1>
+
+    <form id="formulario-formula">
+        <label for="resultado">Resultado:</label>
+        <input type="text" id="resultado" name="resultado">
+		<label for="formula">Formula:</label>
+        <input type="text" id="formula" name="formula">
+		<label for="dependencias">Dependencias:</label>
+        <input type="text" id="dependencias" name="dependencias">
+        <button type="submit">Adicionar</button>
+    </form>
+
+	<button onclick="window.location.href='/dados.html'" style="margin-top: 10px;">Ver todas as fórmulas</button>
+
+	<h1>Teste de base</h1>
+
+    <form id="formulario-base">
+        <label for="base">Combinadores:</label>
+        <input type="text" id="base" name="base">
+        <button type="submit">Testar</button>
+    </form>
+
+	<ul id="prova"></ul>
+
+    <script>
+
+        async function getCombinadores() {
+            const response = await fetch('/combinadores');
+            const combinadores = await response.json();
+			const texto = 'Combinadores:  ' + combinadores.map(c => c.simbolo).sort().join(' ')
+            document.getElementById("combinadores").innerText = texto;
+        }
+        window.onload = getCombinadores;
+
+        document.getElementById("formulario-combinador").addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            const simbolo = document.getElementById("simbolo").value;
+            
+            const response = await fetch('/combinadores', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ simbolo }),
+            });
+
+			if (response.ok) {
+            	const result = await response.json();
+
+				document.getElementById("simbolo").value = '';
+				getCombinadores();
+			} else {
+				alert('Erro ao criar combinador');
+			}
+        });
+		
+        document.getElementById("formulario-invariante").addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            const nome = document.getElementById("nome").value;
+			const excecoes = document.getElementById("excecoes").value.split(/[\s,;-]+/);
+            
+            const response = await fetch('/invariantes', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ nome, excecoes }),
+            });
+
+			if (response.ok) {
+            	const result = await response.json();
+
+				document.getElementById("nome").value = '';
+				document.getElementById("excecoes").value = '';
+			} else {
+				alert('Erro ao adicionar invariante');
+			}
+        });
+		
+        document.getElementById("formulario-formula").addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            const resultado = document.getElementById("resultado").value;
+			const formula = document.getElementById("formula").value;
+			const dependencias = document.getElementById("dependencias").value.split(/[\s,;-]+/);
+            
+            const response = await fetch('/formulas', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ resultado, formula, dependencias }),
+            });
+
+			if (response.ok) {
+            	const result = await response.json();
+
+				document.getElementById("resultado").value = '';
+				document.getElementById("formula").value = '';
+				document.getElementById("dependencias").value = '';
+			} else {
+				alert('Erro ao adicionar formula');
+			}
+        });
+		
+        document.getElementById("formulario-base").addEventListener("submit", async function(event) {
+            event.preventDefault();
+			
+			const combinadores = document.getElementById("base").value.split(/[\s,;-]+/);
+            
+            const response = await fetch('/base', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ combinadores }),
+            });
+			
+			if (response.ok) {
+            	const result = await response.json();
+
+				// Lista os passos da prova
+				const prova = document.getElementById("prova");
+				prova.innerHTML = '';
+				result.forEach(passo => {
+					const li = document.createElement('li');
+					li.textContent = passo;
+					prova.appendChild(li);
+				});
+			} else {
+				alert('Erro ao testar base');
+			}
+        });
+		
+    </script>
+</body>
+</html>

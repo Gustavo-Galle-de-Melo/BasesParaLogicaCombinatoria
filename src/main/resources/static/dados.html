@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de dados</title>
+</head>
+<body>
+    <h1>Combinadores</h1>
+
+	<p id="combinadores"></p>
+
+	<h1>Invariantes</h1>
+
+	<ul id="invariantes"></ul>
+
+	<h1>Fórmulas</h1>
+
+	<ul id="formulas"></ul>
+
+    <script>
+
+        async function getCombinadores() {
+            const response = await fetch('/combinadores');
+            const combinadores = await response.json();
+
+			const texto = 'Combinadores:  ' + combinadores.map(c => c.simbolo).sort().join(' ')
+            document.getElementById("combinadores").innerText = texto;
+        }
+
+		async function getInvariantes() {
+            const response = await fetch('/invariantes');
+            const invariantes = await response.json();
+
+			const listaInvariantes = document.getElementById("invariantes");
+            listaInvariantes.innerHTML = '';
+
+            invariantes.forEach(inv => {
+                const li = document.createElement('li');
+                li.textContent = inv.nome + ': ' + inv.excecoes.map(c => c.simbolo).join(' ');
+                listaInvariantes.appendChild(li);
+            });
+		}
+		
+		async function getFormulas() {
+            const response = await fetch('/formulas');
+            const formulas = await response.json();
+
+			const listaFormulas = document.getElementById("formulas");
+            listaFormulas.innerHTML = '';
+
+            formulas.forEach(form => {
+                const li = document.createElement('li');
+                li.textContent = form.resultado.simbolo + ' = ' + form.formula;
+                listaFormulas.appendChild(li);
+            });
+		}
+
+		async function getDados() {
+			getCombinadores();
+			getInvariantes();
+			getFormulas();
+		}
+
+        window.onload = getDados;
+
+    </script>
+</body>
+</html>
